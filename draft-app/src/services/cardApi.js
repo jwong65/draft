@@ -39,18 +39,25 @@ const getDataWithCache = async (cacheKey, apiCall) => {
 
 // This fetches all cards /cardinfo.php
 export const fetchCards = async (params = {}) => {
-    const cacheKey = `ygo_cards_${JSON.stringify(params)}`;
-
-    return getDataWithCache(cacheKey, async ()=>{
-    try {
-      const response = await axios.get(`${API_URL}/cardinfo.php`, { params });
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching cards:', error);
-      throw error;
+    const apiParams = { ...params };
+    
+    if (apiParams.num && !apiParams.offset) {
+      apiParams.offset = 0;
     }
-    })
+    
+    const cacheKey = `ygo_cards_${JSON.stringify(apiParams)}`;
+  
+    return getDataWithCache(cacheKey, async () => {
+      try {
+        const response = await axios.get(`${API_URL}/cardinfo.php`, { params: apiParams });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching cards:', error);
+        throw error;
+      }
+    });
   };
+  
 
 // Fetches card by Name
 export const searchCardByName = async (cardName) => {
